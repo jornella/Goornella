@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form method="POST" action="{{ url_for('handle_search') }}">
+      <div class="mb-3">
+        <input type="text" class="form-control w-50" name="query" id="query" placeholder="Enter your search query" value="{{ query if query else '' }}" autocomplete="off" autofocus>
+      </div>
+    </form>
+
+    {% if results %}
+        <div class="row mb-3">
+            <div class="col-2 mt-2">
+                <p><a href="javascript:history.back(1)">← Back</a></p>
+                {% for agg in aggs %}
+                    <h6 class="mt-3">{{ agg }}</h6>
+                    {% for key, count in aggs[agg].items() %}
+                        <form method="POST">
+                            <input type="hidden" name="query" value="{{ agg|lower }}:{{key}} {{ query }}">
+                            <button type="submit" class="btn btn-link btn-sm"{% if aggs[agg]|length == 1 %} disabled{% endif %}>{{ key }} ({{ count }})</button>
+                        </form>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            <div class="col-10">
+                <div class="row mb-3">
+                    <div class="col-sm-auto my-auto">
+                        Showing results {{ from_ + 1 }}-{{ from_ + results|length }} out of {{ total }}.
+                    </div>
+                    {% if from_ > 0 %}
+                        <div class="col-sm-auto my-auto">
+                            <a href="javascript:history.back(1)" class="btn btn-primary">← Previous page</a>
+                        </div>
+                    {% endif %}
+                    {% if from_ + results|length < total %}
+                        <div class="col-sm-auto my-auto">
+                            <form method="POST">
+                                <input type="hidden" name="query" value="{{ query }}">
+                                <input type="hidden" name="from_" value="{{ from_ + results|length }}">
+                                <button type="submit" class="btn btn-primary">Next page →</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    <div class="col"></div>
+                </div>
+                {% for result in results %}
+                    <p>
+                        {{ from_ + loop.index }}. <b><a href="{{ url_for('get_document', id=result._id) }}">{{ result._source.name }}</a></b>
+                        <br>
+                        {{ result._source.summary }}
+                        <br>
+                        <small>
+                            Category: {{ result._source.category }}.
+                            Last updated: {{ result._source.updated_at | default(result._source.created_on) }}.
+                            {% if result._score %}<i>(Score: {{ result._score }})</i>{% endif %}
+                        </small>
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+    {% elif request.method == 'POST' %}
+        <p>No results found.</p>
+    {% endif %}
+
+    <!-- Botón para mostrar el formulario -->
+    <button id="new-index-btn" class="btn btn-secondary">Nuevo Índice</button>
+
+    <!-- Formulario para crear índice (inicialmente oculto) -->
+    <div id="create-index-container" style="display: none;" class="mt-3">
+        <form id="create-index-form">
+            <div class="input-group w-25">
+                <input type="text" class="form-control" name="index_name" id="index_name" placeholder="Nombre del índice" required>
+                <button type="submit" class="btn btn-primary">Crear Índice</button>
+            </div>
+        </form>
+
+        <!-- Mensaje de respuesta -->
+        <div id="index-message" class="mt-3"></div>
+    </div>
+
+    <!-- Script para manejar la visibilidad del formulario y AJAX -->
+    <script>
+        document.getElementById("new-index-btn").addEventListener("click", function() {
+            let container = document.getElementById("create-index-container");
+            container.style.display = container.style.display === "none" ? "block" : "none";
+        });
+    
+        document.getElementById("create-index-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Evita la recarga de la página
+    
+            let indexName = document.getElementById("index_name").value.trim();
+            let messageDiv = document.getElementById("index-message");
+            let container = document.getElementById("create-index-container");
+    
+            if (indexName === "") {
+                messageDiv.innerHTML = `<div class="alert alert-warning">El nombre del índice no puede estar vacío.</div>`;
+                return;
+            }
+    
+            fetch("{{ url_for('create_index') }}", {
+                method: "POST",
+                body: new URLSearchParams({ "index_name": indexName }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.text())
+            .then(data => {
+                messageDiv.innerHTML = `<div class="alert alert-success">${data}</div>`;
+                document.getElementById("index_name").value = ""; // Limpia el input
+    
+                // Oculta el formulario después de 2 segundos y mantiene el mensaje de éxito
+                setTimeout(() => {
+                    container.style.display = "none";
+                }, 2000);
+            })
+            .catch(error => {
+                messageDiv.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
+            });
+        });
+    </script>
+
+    <!-- Formulario para subir archivos JSON -->
+<h5 class="mt-4">Subir documentos en JSON</h5>
+<form id="upload-form" method="POST" action="{{ url_for('upload_json') }}" enctype="multipart/form-data">
+    <div class="input-group w-50">
+        <input type="file" class="form-control" name="file" id="file" accept=".json" required>
+        <button type="submit" class="btn btn-primary">Subir y Cargar</button>
+    </div>
+</form>
+
+<!-- Mensaje de respuesta -->
+<div id="upload-message" class="mt-3"></div>
+
+<!-- Script para manejar la subida de archivos vía AJAX -->
+<script>
+    document.getElementById("upload-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        let formData = new FormData(this);
+        let messageDiv = document.getElementById("upload-message");
+
+        fetch(this.action, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            messageDiv.innerHTML = `<div class="alert alert-success">${data}</div>`;
+            document.getElementById("file").value = ""; // Limpiar la selección de archivo
+        })
+        .catch(error => {
+            messageDiv.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
+        });
+    });
+</script>
+
+    
+    
+
+{% endblock %}
