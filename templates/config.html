@@ -1,0 +1,65 @@
+{% block content %}
+    <h3>Configuración</h3>
+    
+    <!-- Formulario para crear índice -->
+    <h5>Crear un nuevo índice</h5>
+    <form id="create-index-form" method="POST" action="{{ url_for('create_index') }}">
+        <div class="input-group w-50">
+            <input type="text" class="form-control" name="index_name" id="index_name" placeholder="Nombre del índice" required>
+            <button type="submit" class="btn btn-primary">Crear Índice</button>
+        </div>
+    </form>
+    <div id="index-message" class="mt-3"></div>
+
+    <!-- Formulario para subir archivos JSON -->
+    <h5 class="mt-4">Añadir documentos al índice</h5>
+    <form id="upload-form" method="POST" action="{{ url_for('upload_json') }}" enctype="multipart/form-data">
+        <div class="input-group w-50">
+            <input type="file" class="form-control" name="file" id="file" accept=".json" required>
+            <button type="submit" class="btn btn-primary">Subir y Cargar</button>
+        </div>
+    </form>
+    <div id="upload-message" class="mt-3"></div>
+
+    <script>
+        document.getElementById("create-index-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let indexName = document.getElementById("index_name").value.trim();
+            let messageDiv = document.getElementById("index-message");
+            if (indexName === "") {
+                messageDiv.innerHTML = `<div class="alert alert-warning">El nombre del índice no puede estar vacío.</div>`;
+                return;
+            }
+            fetch("{{ url_for('create_index') }}", {
+                method: "POST",
+                body: new URLSearchParams({ "index_name": indexName }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.text())
+            .then(data => {
+                messageDiv.innerHTML = `<div class="alert alert-success">${data}</div>`;
+            })
+            .catch(error => {
+                messageDiv.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
+            });
+        });
+
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            let messageDiv = document.getElementById("upload-message");
+            fetch(this.action, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                messageDiv.innerHTML = `<div class="alert alert-success">${data}</div>`;
+                document.getElementById("file").value = "";
+            })
+            .catch(error => {
+                messageDiv.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
+            });
+        });
+    </script>
+{% endblock %}
