@@ -1,40 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <h3>Buscar Documentos</h3>
+    <p>Escribe tu búsqueda y encuentra documentos relevantes en la base de datos.</p>
+
     <div class="row">
-        <!-- Filtros en la izquierda -->
-        {% if aggs %}  <!-- Mostrar solo si hay filtros disponibles -->
+        <!-- Sección de filtros en la izquierda -->
+        {% if aggs %}
         <div class="col-md-3">
             <h5>Filtros</h5>
             {% for agg in aggs %}
                 <h6 class="mt-3">{{ agg }}</h6>
                 {% for key, count in aggs[agg].items() %}
                     <form method="POST">
-                        <input type="hidden" name="query" value="{{ agg|lower }}:{{key}} {{ query }}">
+                        <input type="hidden" name="query" value="{{ agg|lower }}:{{ key }} {{ query }}">
                         <button type="submit" class="btn btn-link btn-sm">{{ key }} ({{ count }})</button>
                     </form>
                 {% endfor %}
             {% endfor %}
         </div>
         {% endif %}
-        
-        <!-- Resultados de búsqueda -->
+
+        <!-- Sección de búsqueda y resultados -->
         <div class="col-md-9">
             <form method="POST" action="{{ url_for('handle_search') }}">
                 <div class="mb-3">
-                    <input type="text" class="form-control" style="width:100%;" name="query" id="query" placeholder="Escribe tu búsqueda aquí" value="{{ query if query else '' }}" autocomplete="off" autofocus>
-                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    <input type="text" class="form-control" style="width:100%;" name="query" id="query" placeholder="Escribe tu búsqueda aquí..." value="{{ query if query else '' }}" autocomplete="off" autofocus>
                 </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
-            
+
             {% if results %}
                 <div class="row mb-3">
                     <div class="col-sm-auto my-auto">
-                        Showing results {{ from_ + 1 }}-{{ from_ + results|length }} out of {{ total }}.
+                        Mostrando resultados {{ from_ + 1 }}-{{ from_ + results|length }} de {{ total }}.
                     </div>
                     {% if from_ > 0 %}
                         <div class="col-sm-auto my-auto">
-                            <a href="javascript:history.back(1)" class="btn btn-primary">← Previous page</a>
+                            <a href="javascript:history.back(1)" class="btn btn-primary">← Página anterior</a>
                         </div>
                     {% endif %}
                     {% if from_ + results|length < total %}
@@ -42,12 +45,12 @@
                             <form method="POST">
                                 <input type="hidden" name="query" value="{{ query }}">
                                 <input type="hidden" name="from_" value="{{ from_ + results|length }}">
-                                <button type="submit" class="btn btn-primary">Next page →</button>
+                                <button type="submit" class="btn btn-primary">Página siguiente →</button>
                             </form>
                         </div>
                     {% endif %}
-                    <div class="col"></div>
                 </div>
+
                 {% for result in results %}
                     <p>
                         {{ from_ + loop.index }}. <b><a href="{{ url_for('get_document', id=result._id) }}">{{ result._source.name }}</a></b>
@@ -55,14 +58,14 @@
                         {{ result._source.summary }}
                         <br>
                         <small>
-                            Category: {{ result._source.category }}.
-                            Last updated: {{ result._source.updated_at | default(result._source.created_on) }}.
+                            Categoría: {{ result._source.category }}.
+                            Última actualización: {{ result._source.updated_at | default(result._source.created_on) }}.
                             {% if result._score %}<i>(Score: {{ result._score }})</i>{% endif %}
                         </small>
                     </p>
                 {% endfor %}
             {% elif request.method == 'POST' %}
-                <p>No results found.</p>
+                <p>No se encontraron resultados.</p>
             {% endif %}
         </div>
     </div>
