@@ -44,22 +44,23 @@
       <!-- Pestañas -->
       <ul class="nav nav-tabs" id="tabs">
         <li class="nav-item">
-          <a class="nav-link active" id="tab-search" href="#" onclick="showTab('search')">Buscar</a>
+          <a class="nav-link active" id="tab-assistant" href="#" onclick="showTab('assistant')">Asistente</a> 
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="tab-search" href="#" onclick="showTab('search')">Buscar</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" id="tab-config" href="#" onclick="showTab('config')">Configuración</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="tab-assistant" href="#" onclick="showTab('assistant')">Asistente</a> <!-- ✅ Esta línea es nueva -->
-        </li>
+        </li>       
       </ul>
       
       <!-- Contenido dinámico -->
-      <div id="search" class="tab-content mt-3">{% block content %}{% endblock %}</div>
+      <div id="search" class="tab-content mt-3"style="display: none;">{% block content %}{% endblock %}</div>
+
       <div id="config" class="tab-content mt-3" style="display: none;">
         {% include 'config.html' %} 
       </div>
-      <div id="assistant" class="tab-content mt-3" style="display: none;">
+      <div id="assistant" class="tab-content mt-3">
         {% include 'assistant.html' %}
       </div>
    
@@ -75,6 +76,10 @@
         document.getElementById('tab-config').classList.toggle('active', tab === 'config');
         document.getElementById('tab-assistant').classList.toggle('active', tab === 'assistant');
       }
+      // Cargar la pestaña Asistente por defecto al cargar la página
+      document.addEventListener("DOMContentLoaded", function () {
+          showTab('assistant');
+      });
     </script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
