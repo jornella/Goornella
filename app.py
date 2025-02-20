@@ -2,6 +2,20 @@ import re
 from flask import Flask, render_template, request
 from search import Search
 import json
+from openai import OpenAI
+import os
+
+
+# Obtener la clave de API y el modelo desde el .env
+api_key = os.getenv("OPENAI_API_KEY")
+MODELO = os.getenv("OPENAI_MODEL", "gpt-4o")  # Usa gpt-4o por defecto si no está definido
+# Verificar que la clave de API esté presente
+if not api_key:
+    raise ValueError("La variable OPENAI_API_KEY no está definida en el archivo .env")
+# Inicializa el cliente de OpenAI
+client = OpenAI(api_key=api_key)
+
+
 
 app = Flask(__name__)
 es = Search()
