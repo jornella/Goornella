@@ -59,15 +59,21 @@
       <div id="config" class="tab-content mt-3" style="display: none;">
         {% include 'config.html' %} 
       </div>
+      <div id="assistant" class="tab-content mt-3" style="display: none;">
+        {% include 'assistant.html' %}
+      </div>
+   
     </div>
     
     <script>
       function showTab(tab) {
         document.getElementById('search').style.display = tab === 'search' ? 'block' : 'none';
         document.getElementById('config').style.display = tab === 'config' ? 'block' : 'none';
+        document.getElementById('assistant').style.display = tab === 'assistant' ? 'block' : 'none';
         
         document.getElementById('tab-search').classList.toggle('active', tab === 'search');
         document.getElementById('tab-config').classList.toggle('active', tab === 'config');
+        document.getElementById('tab-assistant').classList.toggle('active', tab === 'assistant');
       }
     </script>
     

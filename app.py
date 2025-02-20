@@ -175,6 +175,45 @@ def upload_json():
     except Exception as e:
         return f"Error procesando el archivo: {str(e)}", 500
 
+@app.post("/rag")
+def rag():
+    query = request.form.get("query", "").strip()
+    
+    if not query:
+        return "Debe proporcionar una consulta.", 400
+
+    # Usar la búsqueda existente para recuperar documentos
+    filters, parsed_query = extract_filters(query)
+    from_ = 0  # Siempre comenzamos desde el primer resultado
+    
+    results = es.search(
+        query={"bool": {"must": {"multi_match": {"query": parsed_query, "fields": ["name", "summary", "content"]}}}},
+        knn={
+            "field": "embedding",
+            "query_vector": es.get_embedding(parsed_query),
+            "k": 5,  # Número de documentos relevantes a recuperar
+            "num_candidates": 50,
+            **filters,
+        },
+        size=5
+    )
+
+    # Extraer contenido de los documentos recuperados
+    if "hits" in results and "hits" in results["hits"]:
+        context = "\n\n".join([hit["_source"]["content"] for hit in results["hits"]["hits"]])
+    else:
+        context = "No se encontraron documentos relevantes."
+
+    # Generar respuesta con OpenAI
+    response = client.chat.completions.create(
+        model=MODELO,
+        messages=[
+            {"role": "system", "content": "Responde la pregunta utilizando la siguiente información recuperada."},
+            {"role": "user", "content": f"Contexto:\n{context}\n\nPregunta: {query}"}
+        ]
+    )
+
+    return response.choices[0].message.content
 
 
 if __name__ == "__main__":

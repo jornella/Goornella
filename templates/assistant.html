@@ -1,0 +1,39 @@
+{% block content %}
+    <h3>Asistente Inteligente</h3>
+    <p>Haz una pregunta y el asistente buscará información relevante en la base de datos.</p>
+
+    <form id="rag-form">
+        <div class="mb-3">
+            <input type="text" class="form-control" name="query" id="query-input" placeholder="Escribe tu pregunta aquí..." required>
+        </div>
+        <button type="submit" class="btn btn-primary">Consultar</button>
+    </form>
+
+    <div id="rag-response" class="mt-3"></div>
+
+    <script>
+        document.getElementById("rag-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let query = document.getElementById("query-input").value.trim();
+            let responseDiv = document.getElementById("rag-response");
+
+            if (query === "") {
+                responseDiv.innerHTML = `<div class="alert alert-warning">Por favor, escribe una pregunta.</div>`;
+                return;
+            }
+
+            fetch("{{ url_for('rag') }}", {
+                method: "POST",
+                body: new URLSearchParams({ "query": query }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.text())
+            .then(data => {
+                responseDiv.innerHTML = `<div class="alert alert-info"><strong>Respuesta:</strong> ${data}</div>`;
+            })
+            .catch(error => {
+                responseDiv.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
+            });
+        });
+    </script>
+{% endblock %}
