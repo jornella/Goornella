@@ -68,6 +68,7 @@
     
     <script>
       function showTab(tab) {
+        localStorage.setItem('activeTab', tab); 
         document.getElementById('search').style.display = tab === 'search' ? 'block' : 'none';
         document.getElementById('config').style.display = tab === 'config' ? 'block' : 'none';
         document.getElementById('assistant').style.display = tab === 'assistant' ? 'block' : 'none';
@@ -76,9 +77,10 @@
         document.getElementById('tab-config').classList.toggle('active', tab === 'config');
         document.getElementById('tab-assistant').classList.toggle('active', tab === 'assistant');
       }
-      // Cargar la pestaña Asistente por defecto al cargar la página
+      // Cargar la pestaña activa desde localStorage cuando se recarga la página
       document.addEventListener("DOMContentLoaded", function () {
-          showTab('assistant');
+          const activeTab = localStorage.getItem('activeTab') || 'assistant'; // Si no hay pestaña guardada, cargar 'assistant'
+          showTab(activeTab);
       });
     </script>
     
