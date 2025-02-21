@@ -5,7 +5,7 @@
     <h5>Crear un nuevo índice</h5>
     <form id="create-index-form" method="POST" action="{{ url_for('create_index') }}">
         <div class="input-group w-50">
-            <input type="text" class="form-control" name="index_name" id="index_name" placeholder="Nombre del índice" required>
+            <input type="text" class="form-control" name="index_name" id="index_name_config" placeholder="Nombre del índice" required>
             <button type="submit" class="btn btn-primary">Crear Índice</button>
         </div>
     </form>
@@ -50,7 +50,7 @@
         // Manejo de la creación de índice y refresco de página
         document.getElementById("create-index-form").addEventListener("submit", function(event) {
             event.preventDefault();
-            let indexName = document.getElementById("index_name").value.trim();
+            let indexName = document.getElementById("index_name_config").value.trim();
             let messageDiv = document.getElementById("index-message");
 
             if (indexName === "") {
