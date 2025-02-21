@@ -34,6 +34,15 @@ class Search:
                 print("❌ Elasticsearch no disponible, reintentando en 5 segundos...")
                 time.sleep(5)  # Esperar 5 segundos antes de intentar de nuevo
 
+    def get_indices(self):
+        try:
+            indices = list(self.es.indices.get_alias().keys())  # Obtener los nombres de los índices
+            print("Índices encontrados:", indices)  # Para depuración
+            return indices
+        except Exception as e:
+            print("Error al obtener los índices:", e)
+            return []
+
 
 
     def create_index(self, index_name="my_documents"):
@@ -58,19 +67,19 @@ class Search:
     def get_embedding(self, text):
         return self.model.encode(text)
 
-    def insert_document(self, document):
+    def insert_document(self, document,index_name="my_documents"):
         return self.es.index(
-            index="my_documents",
+            index=index_name,
             document={
                 **document,
                 "embedding": self.get_embedding(document["summary"]),
             },
         )
 
-    def insert_documents(self, documents):
+    def insert_documents(self, documents,index_name="my_documents"):
         operations = []
         for document in documents:
-            operations.append({"index": {"_index": "my_documents"}})
+            operations.append({"index": {"_index": index_name}})
             operations.append(
                 {
                     **document,

@@ -16,20 +16,48 @@
     <form id="upload-form" method="POST" action="{{ url_for('upload_json') }}" enctype="multipart/form-data">
         <div class="input-group w-50">
             <input type="file" class="form-control" name="file" id="file" accept=".json" required>
-            <button type="submit" class="btn btn-primary">Subir y Cargar</button>
         </div>
+        <div class="input-group w-50 mt-2">
+            <select class="form-control" name="index_name" id="index_name_select" required>
+                <option disabled selected>Cargando índices...</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Subir y Cargar</button>
     </form>
     <div id="upload-message" class="mt-3"></div>
 
     <script>
+        // Cargar índices disponibles al cargar la página
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("{{ url_for('get_indices') }}")
+                .then(response => response.json())
+                .then(indices => {
+                    let select = document.getElementById("index_name_select");
+                    select.innerHTML = ""; // Vacía el select antes de agregar opciones
+                    indices.forEach(index => {
+                        let option = document.createElement("option");
+                        option.value = index;
+                        option.textContent = index;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando índices:", error);
+                    document.getElementById("index_name_select").innerHTML = "<option disabled>Error al cargar índices</option>";
+                });
+        });
+
+        // Manejo de la creación de índice y refresco de página
         document.getElementById("create-index-form").addEventListener("submit", function(event) {
             event.preventDefault();
             let indexName = document.getElementById("index_name").value.trim();
             let messageDiv = document.getElementById("index-message");
+
             if (indexName === "") {
                 messageDiv.innerHTML = `<div class="alert alert-warning">El nombre del índice no puede estar vacío.</div>`;
                 return;
             }
+
             fetch("{{ url_for('create_index') }}", {
                 method: "POST",
                 body: new URLSearchParams({ "index_name": indexName }),
@@ -38,16 +66,21 @@
             .then(response => response.text())
             .then(data => {
                 messageDiv.innerHTML = `<div class="alert alert-success">${data}</div>`;
+                setTimeout(() => {
+                    location.reload(); // Refresca la página después de 1 segundo
+                }, 1000);
             })
             .catch(error => {
                 messageDiv.innerHTML = `<div class="alert alert-danger">Error: ${error}</div>`;
             });
         });
 
+        // Manejo de la subida de documentos con índice seleccionado
         document.getElementById("upload-form").addEventListener("submit", function(event) {
             event.preventDefault();
             let formData = new FormData(this);
             let messageDiv = document.getElementById("upload-message");
+
             fetch(this.action, {
                 method: "POST",
                 body: formData

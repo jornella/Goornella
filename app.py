@@ -134,14 +134,20 @@ def extract_filters(query):
 @app.post("/create_index")
 def create_index():
     index_name = request.form.get("index_name", "").strip()
+    print(f"📌 Intentando crear el índice: {index_name}")  # Debugging
+
     if not index_name:
+        print("⚠ No se proporcionó un nombre de índice")
         return "Debe proporcionar un nombre de índice.", 400
     
     try:
-        es.create_index(index_name)  # Llamamos la función en search.py
+        es.create_index(index_name)  # Llamamos a la función en `search.py`
+        print(f"✅ Índice '{index_name}' creado exitosamente.")
         return f"Índice '{index_name}' creado exitosamente.", 200
     except Exception as e:
+        print(f"❌ Error al crear el índice: {str(e)}")
         return f"Error al crear el índice: {str(e)}", 500
+
 
 
 
@@ -152,7 +158,11 @@ def upload_json():
         return "No se envió ningún archivo.", 400
 
     file = request.files["file"]
+    index_name = request.form.get("index_name", "").strip()
     
+    if not index_name:
+        return "Debe seleccionar un índice.", 400
+
     if file.filename == "":
         return "No se seleccionó ningún archivo.", 400
 
@@ -160,20 +170,17 @@ def upload_json():
         return "Solo se permiten archivos JSON.", 400
 
     try:
-        # Leer el contenido del archivo JSON
         documents = json.load(file)
-
-        # Verificar si es una lista de documentos
         if not isinstance(documents, list):
             return "El archivo JSON debe contener un array de documentos.", 400
 
-        # Insertar documentos en Elasticsearch
-        es.insert_documents(documents)
+        es.insert_documents(documents, index_name)  # Inserta documentos en el índice seleccionado
         
-        return f"Se cargaron {len(documents)} documentos correctamente.", 200
+        return f"Se cargaron {len(documents)} documentos correctamente en el índice '{index_name}'.", 200
 
     except Exception as e:
         return f"Error procesando el archivo: {str(e)}", 500
+
 
 @app.post("/rag")
 def rag():
@@ -214,6 +221,28 @@ def rag():
     )
 
     return response.choices[0].message.content
+
+
+@app.get("/config")
+def config():
+    try:
+        indices = es.get_indices()  # Obtiene la lista de índices
+        print("Índices en config.html:", indices)  # Depuración
+    except Exception as e:
+        indices = []
+        print("Error al obtener índices en config:", e)
+    return render_template("config.html", indices=indices)
+
+@app.get("/get_indices")
+def get_indices():
+    try:
+        indices = es.get_indices()  # Obtiene la lista de índices
+        return indices  # Devuelve los índices en formato JSON
+    except Exception as e:
+        print("Error al obtener índices:", e)
+        return []
+
+
 
 
 if __name__ == "__main__":
