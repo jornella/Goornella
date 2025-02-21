@@ -29,6 +29,7 @@ def index():
 @app.post("/")
 def handle_search():
     query = request.form.get("query", "")
+    index_name = request.form.get("index_name", "my_documents")  # Si no se selecciona, usa el predeterminado
     filters, parsed_query = extract_filters(query)
     from_ = request.form.get("from_", type=int, default=0)
 
@@ -45,6 +46,7 @@ def handle_search():
         search_query = {"must": {"match_all": {}}}
 
     results = es.search(
+        index_name=index_name,
         query={"bool": {**search_query, **filters}},
         knn={
             "field": "embedding",
@@ -89,6 +91,7 @@ def handle_search():
         from_=from_,
         total=results["hits"]["total"]["value"],
         aggs=aggs,
+        selected_index=index_name
     )
 
 

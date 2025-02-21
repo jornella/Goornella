@@ -101,7 +101,7 @@ class Search:
             documents = json.loads(f.read())
         return self.insert_documents(documents)
 
-    def search(self, **query_args):
+    def search(self, index_name="my_documents", **query_args):
         #print("Query Args:", query_args)  # Depuración
 
         # Eliminar `sub_searches` ya que no es un argumento válido
@@ -112,7 +112,7 @@ class Search:
             del query_args["rank"]
 
         return self.es.search(
-            index="my_documents",
+            index=index_name,
             **query_args
         )
 

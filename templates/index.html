@@ -25,10 +25,39 @@
         <div class="col-md-9">
             <form method="POST" action="{{ url_for('handle_search') }}">
                 <div class="mb-3">
+                    <label for="index_name" class="form-label">Buscar en:</label>
+                    <select class="form-select w-50 mb-2" name="index_name" id="index_name" required>
+                        <option value="" disabled selected>Seleccione un índice...</option>
+                    </select>
                     <input type="text" class="form-control" style="width:100%;" name="query" id="query" placeholder="Escribe tu búsqueda aquí..." value="{{ query if query else '' }}" autocomplete="off" autofocus>
                 </div>
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
+            
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    fetch("{{ url_for('get_indices') }}")
+                        .then(response => response.json())
+                        .then(indices => {
+                            let select = document.getElementById("index_name");
+                            select.innerHTML = '<option value="" disabled selected>Seleccione un índice...</option>'; // Mantiene la opción por defecto
+                            indices.forEach(index => {
+                                let option = document.createElement("option");
+                                option.value = index;
+                                option.textContent = index;
+                                if ("{{ selected_index }}" && index === "{{ selected_index }}") {
+                                    option.selected = true;
+                                }
+                                select.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error("Error cargando índices:", error);
+                            document.getElementById("index_name").innerHTML = "<option disabled>Error al cargar índices</option>";
+                        });
+                });
+            </script>
+            
 
             {% if results %}
                 <div class="row mb-3">
