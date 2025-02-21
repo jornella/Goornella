@@ -45,7 +45,8 @@ class Search:
 
 
 
-    def create_index(self, index_name="my_documents"):
+    def create_index(self, index_name):
+        print(f"🔍 Creando índice en Elasticsearch: {index_name}")  # Debugging
         self.es.indices.delete(index=index_name, ignore_unavailable=True)
         self.es.indices.create(
             index=index_name,
