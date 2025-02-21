@@ -197,6 +197,7 @@ def rag():
     from_ = 0  # Siempre comenzamos desde el primer resultado
     
     results = es.search(
+        index_name="my_documents",
         query={"bool": {"must": {"multi_match": {"query": parsed_query, "fields": ["name", "summary", "content"]}}}},
         knn={
             "field": "embedding",
@@ -239,11 +240,13 @@ def config():
 @app.get("/get_indices")
 def get_indices():
     try:
-        indices = es.get_indices()  # Obtiene la lista de índices
-        return indices  # Devuelve los índices en formato JSON
+        indices = es.get_indices()  # Obtiene todos los índices
+        filtered_indices = [index for index in indices if not index.startswith(".")]  # Filtrar índices del sistema
+        return filtered_indices  # Devuelve solo los índices creados por el usuario
     except Exception as e:
         print("Error al obtener índices:", e)
         return []
+
 
 
 

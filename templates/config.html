@@ -15,9 +15,9 @@
     <h5 class="mt-4">Añadir documentos al índice</h5>
     <form id="upload-form" method="POST" action="{{ url_for('upload_json') }}" enctype="multipart/form-data">
         <div class="w-50 mt-2">
-            <select class="form-select w-50" name="index_name" id="index_name_select" required>
+            <select class="form-select index-select" name="index_name" required>
                 <option value="" disabled selected>Seleccione un índice...</option>
-            </select>
+            </select>            
         </div>   
         <div class="input-group w-50">
             <input type="file" class="form-control" name="file" id="file" accept=".json" required>
