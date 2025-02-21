@@ -89,7 +89,10 @@ Para levantar el entorno de Elasticsearch y Kibana, ejecutar:
 ```
 La aplicación estará disponible en `http://127.0.0.1:5000/`.
 
-## Creación del Índice
+
+## Funcionalidades
+
+### 1️⃣ Configuración y Creación del Índice
 La interfaz proporciona una opción para crear el índice sin necesidad de la terminal. Solo se debe proporcionar un nombre y se generará con la siguiente estructura:
 ```json
 {
@@ -105,20 +108,38 @@ La interfaz proporciona una opción para crear el índice sin necesidad de la te
 ```
 Posteriormente, se agregarán los campos según el archivo de datos cargado.
 
-## Funcionalidades
-- **Búsqueda de documentos**: Basada en texto y similitud semántica.
-- **Indexación automática**: Inserción de documentos con embeddings generados con `SentenceTransformer`.
-- **Filtrado de resultados**: Permite filtrar por categoría y año de actualización.
-- **Subida de documentos en JSON**: Opción para cargar documentos desde un archivo JSON.
+![Creación del índice](images/001-Config-Create_Index.png)
+![Índice creado](images/001-Config-Created_Index.png)
 
-## Endpoints Principales
-| Método | Ruta                | Descripción |
-|---------|----------------------|-------------|
-| `GET`   | `/`                  | Página principal de búsqueda |
-| `POST`  | `/`                  | Ejecuta una búsqueda en Elasticsearch |
-| `GET`   | `/document/<id>`      | Muestra el contenido de un documento |
-| `POST`  | `/create_index`       | Crea un nuevo índice en Elasticsearch |
-| `POST`  | `/upload_json`        | Sube y procesa un archivo JSON con documentos |
+
+
+### 2️⃣ Inserción de Documentos
+Opción para cargar documentos desde un archivo JSON.
+Los documentos son generados con embeddings mediante `SentenceTransformer`.
+
+![Insertar documentos - paso 1](images/001-Config-Insert_Documents01.png)
+![Insertar documentos - paso 2](images/001-Config-Insert_Documents02.png)
+![Documentos insertados](images/001-Config-Inserted_Documents.png)
+
+
+
+
+
+### 3️⃣ Búsqueda de Documentos
+Basada en texto, similitud semántica y embeddings.
+Permite filtrar por categoría y año de actualización.
+
+![Búsqueda por texto](images/002-Buscar-01_text.png)
+![Búsqueda en español](images/002-Buscar-02Spanish_text.png)
+![Búsqueda en inglés](images/002-Buscar-03English_text.png)
+
+### 4️⃣ Asistente Inteligente
+Permite hacer consultas inteligentes y con lenguaje natural sobre los datos
+
+![Consulta en español](images/003-Asistente-02Spanish_Text.png)
+![Respuesta en español](images/003-Asistente-03Spanish_Text.png)
+
+
 
 ## Contribución
 Si deseas contribuir al proyecto, por favor sigue estos pasos:
