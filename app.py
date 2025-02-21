@@ -188,7 +188,7 @@ def upload_json():
 @app.post("/rag")
 def rag():
     query = request.form.get("query", "").strip()
-    
+    index_name = request.form.get("index_name", "my_documents") 
     if not query:
         return "Debe proporcionar una consulta.", 400
 
@@ -197,7 +197,7 @@ def rag():
     from_ = 0  # Siempre comenzamos desde el primer resultado
     
     results = es.search(
-        index_name="my_documents",
+        index_name=index_name,
         query={"bool": {"must": {"multi_match": {"query": parsed_query, "fields": ["name", "summary", "content"]}}}},
         knn={
             "field": "embedding",

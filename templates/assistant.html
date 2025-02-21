@@ -3,11 +3,18 @@
     <p>Haz una pregunta y el asistente buscará información relevante en la base de datos.</p>
 
     <form id="rag-form">
-        <div class="mb-3">
-            <input type="text" class="form-control" name="query" id="query-input" placeholder="Escribe tu pregunta aquí..." required>
+        <div class="mb-3 d-flex align-items-center">
+            <label for="index-select" class="form-label me-2">Buscar en:</label>
+            <select class="form-select index-select form-select-sm w-auto" name="index_name" id="index-select" required>
+                <option value="" disabled selected>Seleccione un índice...</option>
+            </select>
         </div>
+        <div class="input-group w-50">
+            <input type="text" class="form-control" style="width:100%;" name="query" id="query-input" placeholder="Escribe tu pregunta aquí..." value="{{ query if query else '' }}" autocomplete="off" autofocus required>
+        </div>                          
         <button type="submit" class="btn btn-primary">Consultar</button>
     </form>
+    
 
     <div id="rag-response" class="mt-3"></div>
     
@@ -21,6 +28,7 @@
             event.preventDefault();
             
             let query = document.getElementById("query-input").value.trim();
+            let indexName = document.getElementById("index-select").value; 
             let responseDiv = document.getElementById("rag-response");
             let loadingMessage = document.getElementById("loading-message");  // Mensaje de carga
 
@@ -37,7 +45,7 @@
 
             fetch("{{ url_for('rag') }}", {
                 method: "POST",
-                body: new URLSearchParams({ "query": query }),
+                body: new URLSearchParams({ "query": query, "index_name": indexName }),
                 headers: { "Content-Type": "application/x-www-form-urlencoded" }
             })
             .then(response => response.text())

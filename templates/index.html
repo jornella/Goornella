@@ -24,11 +24,13 @@
         <!-- Sección de búsqueda y resultados -->
         <div class="col-md-9">
             <form method="POST" action="{{ url_for('handle_search') }}">
-                <div class="mb-3">
-                    <label for="index_name" class="form-label">Buscar en:</label>
-                    <select class="form-select index-select" name="index_name" required>
+                <div class="mb-3 d-flex align-items-center">
+                    <label for="index_name" class="form-label me-2">Buscar en:</label>
+                    <select class="form-select index-select form-select-sm w-auto" name="index_name" id="index_name" required>
                         <option value="" disabled selected>Seleccione un índice...</option>
                     </select>                    
+                </div>
+                <div class="mb-3">               
                     <input type="text" class="form-control" style="width:100%;" name="query" id="query" placeholder="Escribe tu búsqueda aquí..." value="{{ query if query else '' }}" autocomplete="off" autofocus>
                 </div>
                 <button type="submit" class="btn btn-primary">Buscar</button>
